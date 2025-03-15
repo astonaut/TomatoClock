@@ -1,0 +1,83 @@
+:root {
+  --color-pomodoro: #f87171;
+  --color-short-break: #60a5fa;
+  --color-long-break: #818cf8;
+}
+
+body {
+  font-family: 'Roboto', sans-serif;
+  transition: background-color 0.5s ease;
+}
+
+#timer-circle {
+  border: 10px solid var(--color-pomodoro);
+  transition: all 0.3s ease;
+  background: linear-gradient(135deg, #fff5f5 0%, #fee2e2 100%);
+}
+
+.mode-pomodoro #timer-circle {
+  border-color: var(--color-pomodoro);
+  background: linear-gradient(135deg, #fff5f5 0%, #fee2e2 100%);
+}
+
+.mode-short-break #timer-circle {
+  border-color: var(--color-short-break);
+  background: linear-gradient(135deg, #eff6ff 0%, #dbeafe 100%);
+}
+
+.mode-long-break #timer-circle {
+  border-color: var(--color-long-break);
+  background: linear-gradient(135deg, #eef2ff 0%, #e0e7ff 100%);
+}
+
+button:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.mode-btn {
+  transition: all 0.2s ease;
+}
+
+.mode-btn:hover {
+  transform: translateY(-2px);
+}
+
+#timer {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.5px;
+}
+
+@keyframes pulse {
+  0% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.05);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.timer-active #timer-circle {
+  animation: pulse 2s infinite;
+}
+
+.progress-ring {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+input[type="number"] {
+  -moz-appearance: textfield;
+}
+
+input::-webkit-outer-spin-button,
+input::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+} 

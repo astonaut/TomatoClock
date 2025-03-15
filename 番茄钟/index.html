@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>番茄钟</title>
+  <link rel="stylesheet" href="styles.css">
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gray-100 font-sans">
+  <div id="app" class="container mx-auto max-w-md px-4 py-8">
+    <header class="text-center mb-8">
+      <h1 class="text-3xl font-bold text-red-600">番茄钟</h1>
+      <p class="text-gray-600">提高专注力，增加效率</p>
+    </header>
+    
+    <main class="bg-white rounded-lg shadow-lg p-6">
+      <div class="timer-display mb-8">
+        <div id="timer-circle" class="relative w-64 h-64 rounded-full mx-auto flex items-center justify-center">
+          <div id="timer" class="text-5xl font-bold">25:00</div>
+        </div>
+      </div>
+      
+      <div class="timer-controls flex justify-center space-x-4 mb-6">
+        <button id="start-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-full">
+          开始
+        </button>
+        <button id="pause-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded-full" disabled>
+          暂停
+        </button>
+        <button id="reset-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-full" disabled>
+          重置
+        </button>
+      </div>
+      
+      <div class="timer-mode mb-6">
+        <div class="flex justify-center space-x-2">
+          <button id="pomodoro-btn" class="mode-btn bg-red-100 text-red-800 font-medium py-1 px-4 rounded-full border-2 border-red-500">
+            工作
+          </button>
+          <button id="short-break-btn" class="mode-btn bg-white text-blue-800 font-medium py-1 px-4 rounded-full border-2 border-gray-300">
+            短休息
+          </button>
+          <button id="long-break-btn" class="mode-btn bg-white text-indigo-800 font-medium py-1 px-4 rounded-full border-2 border-gray-300">
+            长休息
+          </button>
+        </div>
+      </div>
+      
+      <div class="settings mb-4">
+        <div class="flex justify-between items-center mb-2">
+          <label class="text-gray-700">工作时长 (分钟)</label>
+          <input id="work-time" type="number" min="1" max="60" value="25" class="border rounded w-16 px-2 py-1">
+        </div>
+        <div class="flex justify-between items-center mb-2">
+          <label class="text-gray-700">短休息时长 (分钟)</label>
+          <input id="short-break-time" type="number" min="1" max="30" value="5" class="border rounded w-16 px-2 py-1">
+        </div>
+        <div class="flex justify-between items-center">
+          <label class="text-gray-700">长休息时长 (分钟)</label>
+          <input id="long-break-time" type="number" min="1" max="60" value="15" class="border rounded w-16 px-2 py-1">
+        </div>
+      </div>
+    </main>
+    
+    <footer class="mt-8 text-center text-gray-600 text-sm">
+      <p>番茄工作法 © 2024</p>
+    </footer>
+  </div>
+  
+  <audio id="alarm-sound" src="https://assets.mixkit.co/sfx/download/mixkit-alarm-digital-clock-beep-989.wav" preload="auto"></audio>
+  
+  <script src="script.js"></script>
+</body>
+</html> 
