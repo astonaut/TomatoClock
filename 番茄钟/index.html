@@ -4,73 +4,434 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>番茄钟</title>
-  <link rel="stylesheet" href="styles.css">
   <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@300;400;500;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/boxicons@2.1.4/css/boxicons.min.css">
+  <style>
+    body {
+      font-family: 'Noto Sans SC', sans-serif;
+      background-color: #F8F9FA;
+    }
+      
+    .timer-circle {
+      width: 280px;
+      height: 280px;
+      border-radius: 50%;
+      background: conic-gradient(#FF6347 0% var(--progress, 0%), #f2f2f2 var(--progress, 0%) 100%);
+      position: relative;
+      transition: background 0.2s ease;
+    }
+    
+    .timer-circle::before {
+      content: '';
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      right: 10px;
+      bottom: 10px;
+      background: white;
+      border-radius: 50%;
+      box-shadow: inset 0 0 10px rgba(0,0,0,0.05);
+    }
+    
+    .timer-inner {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1;
+    }
+    
+    .mode-btn {
+      transition: all 0.2s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    
+    .mode-btn::after {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 2px;
+      bottom: -2px;
+      left: 0;
+      background-color: transparent;
+      transition: background-color 0.2s ease;
+    }
+    
+    .mode-btn.active::after {
+      background-color: currentColor;
+    }
+    
+    .control-btn {
+      transition: all 0.2s ease;
+    }
+    
+    .control-btn:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+    
+    .control-btn:disabled {
+      opacity: 0.6;
+    }
+    
+    .settings-container {
+      max-height: 0;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      opacity: 0;
+      transform: translateY(-10px);
+      margin: 0;
+      padding: 0;
+    }
+    
+    .settings-visible {
+      max-height: 500px;
+      opacity: 1;
+      transform: translateY(0);
+      margin-top: 1rem;
+      padding: 1rem;
+      background-color: #f8f9fa;
+      border-radius: 0.5rem;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.05);
+    }
+    
+    .settings-btn {
+      transition: all 0.2s ease;
+      border-radius: 9999px;
+      padding: 0.5rem 1rem;
+    }
+    
+    .settings-btn:hover {
+      background-color: #f3f4f6;
+    }
+    
+    .settings-btn.active {
+      background-color: #f3f4f6;
+      color: #4b5563;
+    }
+    
+    #work-mode { --color: #FF6347; }
+    #short-break-mode { --color: #4FC3F7; }
+    #long-break-mode { --color: #66BB6A; }
+    
+    .work-active .timer-circle { background: conic-gradient(#FF6347 0% var(--progress, 0%), #f2f2f2 var(--progress, 0%) 100%); }
+    .short-break-active .timer-circle { background: conic-gradient(#4FC3F7 0% var(--progress, 0%), #f2f2f2 var(--progress, 0%) 100%); }
+    .long-break-active .timer-circle { background: conic-gradient(#66BB6A 0% var(--progress, 0%), #f2f2f2 var(--progress, 0%) 100%); }
+  </style>
 </head>
-<body class="bg-gray-100 font-sans">
+<body class="min-h-screen">
   <div id="app" class="container mx-auto max-w-md px-4 py-8">
-    <header class="text-center mb-8">
-      <h1 class="text-3xl font-bold text-red-600">番茄钟</h1>
-      <p class="text-gray-600">提高专注力，增加效率</p>
+    <header class="text-center mb-10">
+      <h1 class="text-3xl font-bold text-gray-800 flex items-center justify-center">
+        <span class="text-red-500 mr-2">🍅</span>番茄钟
+      </h1>
+      <p class="text-gray-500 text-sm mt-1">提高专注力，增加效率</p>
     </header>
     
-    <main class="bg-white rounded-lg shadow-lg p-6">
-      <div class="timer-display mb-8">
-        <div id="timer-circle" class="relative w-64 h-64 rounded-full mx-auto flex items-center justify-center">
-          <div id="timer" class="text-5xl font-bold">25:00</div>
-        </div>
-      </div>
-      
-      <div class="timer-controls flex justify-center space-x-4 mb-6">
-        <button id="start-btn" class="bg-green-500 hover:bg-green-600 text-white font-bold py-2 px-6 rounded-full">
-          开始
-        </button>
-        <button id="pause-btn" class="bg-yellow-500 hover:bg-yellow-600 text-white font-bold py-2 px-6 rounded-full" disabled>
-          暂停
-        </button>
-        <button id="reset-btn" class="bg-red-500 hover:bg-red-600 text-white font-bold py-2 px-6 rounded-full" disabled>
-          重置
-        </button>
-      </div>
-      
-      <div class="timer-mode mb-6">
-        <div class="flex justify-center space-x-2">
-          <button id="pomodoro-btn" class="mode-btn bg-red-100 text-red-800 font-medium py-1 px-4 rounded-full border-2 border-red-500">
-            工作
+    <main class="bg-white rounded-2xl shadow-md p-8">
+      <!-- 模式选择 -->
+      <div class="timer-mode mb-8">
+        <div class="flex justify-center space-x-6">
+          <button id="pomodoro-btn" class="mode-btn active px-2 py-1 text-red-600 font-medium" data-mode="work">
+            <i class="bx bx-briefcase text-xl"></i>
+            <div>工作</div>
           </button>
-          <button id="short-break-btn" class="mode-btn bg-white text-blue-800 font-medium py-1 px-4 rounded-full border-2 border-gray-300">
-            短休息
+          <button id="short-break-btn" class="mode-btn px-2 py-1 text-blue-500 font-medium" data-mode="short-break">
+            <i class="bx bx-coffee text-xl"></i>
+            <div>短休息</div>
           </button>
-          <button id="long-break-btn" class="mode-btn bg-white text-indigo-800 font-medium py-1 px-4 rounded-full border-2 border-gray-300">
-            长休息
+          <button id="long-break-btn" class="mode-btn px-2 py-1 text-green-500 font-medium" data-mode="long-break">
+            <i class="bx bx-leaf text-xl"></i>
+            <div>长休息</div>
           </button>
         </div>
       </div>
       
-      <div class="settings mb-4">
-        <div class="flex justify-between items-center mb-2">
-          <label class="text-gray-700">工作时长 (分钟)</label>
-          <input id="work-time" type="number" min="1" max="60" value="25" class="border rounded w-16 px-2 py-1">
+      <!-- 计时器显示 -->
+      <div id="work-mode" class="timer-display mb-10 flex justify-center work-active">
+        <div class="timer-circle">
+          <div class="timer-inner">
+            <div id="timer" class="text-6xl font-bold text-gray-800">25:00</div>
+            <div id="status-text" class="text-sm mt-2 text-gray-500">准备开始</div>
+          </div>
         </div>
-        <div class="flex justify-between items-center mb-2">
-          <label class="text-gray-700">短休息时长 (分钟)</label>
-          <input id="short-break-time" type="number" min="1" max="30" value="5" class="border rounded w-16 px-2 py-1">
-        </div>
-        <div class="flex justify-between items-center">
-          <label class="text-gray-700">长休息时长 (分钟)</label>
-          <input id="long-break-time" type="number" min="1" max="60" value="15" class="border rounded w-16 px-2 py-1">
+      </div>
+      
+      <!-- 控制按钮 -->
+      <div class="timer-controls flex justify-center space-x-4 mb-10">
+        <button id="start-btn" class="control-btn bg-red-500 hover:bg-red-600 text-white font-medium py-3 px-8 rounded-full flex items-center shadow-md">
+          <i class="bx bx-play mr-1"></i> 开始
+        </button>
+        <button id="pause-btn" class="control-btn bg-yellow-500 hover:bg-yellow-600 text-white font-medium py-3 px-8 rounded-full flex items-center shadow-md" disabled>
+          <i class="bx bx-pause mr-1"></i> 暂停
+        </button>
+        <button id="reset-btn" class="control-btn bg-gray-300 hover:bg-gray-400 text-gray-700 font-medium py-3 px-8 rounded-full flex items-center shadow-md" disabled>
+          <i class="bx bx-refresh mr-1"></i> 重置
+        </button>
+      </div>
+      
+      <!-- 设置按钮 -->
+      <div class="text-center mb-2">
+        <button id="toggle-settings" class="settings-btn inline-flex items-center text-gray-500 hover:text-gray-700 text-sm">
+          <i class="bx bx-cog mr-1"></i> 设置
+          <i id="settings-arrow" class="bx bx-chevron-down ml-1 transition-transform duration-300"></i>
+        </button>
+      </div>
+      
+      <!-- 设置面板 -->
+      <div id="settings-panel" class="settings-container">
+        <div class="mb-4">
+          <div class="flex justify-between items-center mb-2">
+            <label class="text-gray-700 text-sm">工作时长 (分钟)</label>
+            <div class="flex items-center">
+              <button class="decrement-time bg-gray-200 w-8 h-8 rounded-l-lg flex items-center justify-center" data-target="work-time">-</button>
+              <input id="work-time" type="number" min="1" max="60" value="25" class="border-y text-center w-12 h-8 outline-none">
+              <button class="increment-time bg-gray-200 w-8 h-8 rounded-r-lg flex items-center justify-center" data-target="work-time">+</button>
+            </div>
+          </div>
+          <div class="flex justify-between items-center mb-2">
+            <label class="text-gray-700 text-sm">短休息时长 (分钟)</label>
+            <div class="flex items-center">
+              <button class="decrement-time bg-gray-200 w-8 h-8 rounded-l-lg flex items-center justify-center" data-target="short-break-time">-</button>
+              <input id="short-break-time" type="number" min="1" max="30" value="5" class="border-y text-center w-12 h-8 outline-none">
+              <button class="increment-time bg-gray-200 w-8 h-8 rounded-r-lg flex items-center justify-center" data-target="short-break-time">+</button>
+            </div>
+          </div>
+          <div class="flex justify-between items-center">
+            <label class="text-gray-700 text-sm">长休息时长 (分钟)</label>
+            <div class="flex items-center">
+              <button class="decrement-time bg-gray-200 w-8 h-8 rounded-l-lg flex items-center justify-center" data-target="long-break-time">-</button>
+              <input id="long-break-time" type="number" min="1" max="60" value="15" class="border-y text-center w-12 h-8 outline-none">
+              <button class="increment-time bg-gray-200 w-8 h-8 rounded-r-lg flex items-center justify-center" data-target="long-break-time">+</button>
+            </div>
+          </div>
         </div>
       </div>
     </main>
     
-    <footer class="mt-8 text-center text-gray-600 text-sm">
+    <footer class="mt-8 text-center text-gray-500 text-xs">
       <p>番茄工作法 © 2024</p>
+      <a href="prd.html" class="text-blue-500 hover:underline mt-1 inline-block">查看PRD文档</a>
     </footer>
   </div>
   
   <audio id="alarm-sound" src="https://assets.mixkit.co/sfx/download/mixkit-alarm-digital-clock-beep-989.wav" preload="auto"></audio>
   
-  <script src="script.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      // DOM 元素
+      const timer = document.getElementById('timer');
+      const statusText = document.getElementById('status-text');
+      const startBtn = document.getElementById('start-btn');
+      const pauseBtn = document.getElementById('pause-btn');
+      const resetBtn = document.getElementById('reset-btn');
+      const pomodoroBtn = document.getElementById('pomodoro-btn');
+      const shortBreakBtn = document.getElementById('short-break-btn');
+      const longBreakBtn = document.getElementById('long-break-btn');
+      const workTime = document.getElementById('work-time');
+      const shortBreakTime = document.getElementById('short-break-time');
+      const longBreakTime = document.getElementById('long-break-time');
+      const alarmSound = document.getElementById('alarm-sound');
+      const timerModes = document.getElementById('work-mode');
+      const toggleSettings = document.getElementById('toggle-settings');
+      const settingsPanel = document.getElementById('settings-panel');
+      const settingsArrow = document.getElementById('settings-arrow');
+      
+      // 时间设置
+      let currentMinutes = parseInt(workTime.value);
+      let currentSeconds = 0;
+      let totalSeconds = currentMinutes * 60;
+      let timerInterval = null;
+      let currentMode = 'work';
+      
+      // 更新计时器显示
+      function updateTimerDisplay() {
+        const minutes = Math.floor(currentSeconds / 60);
+        const seconds = currentSeconds % 60;
+        timer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        // 更新进度条
+        const progress = 100 - (currentSeconds / totalSeconds * 100);
+        document.documentElement.style.setProperty('--progress', `${progress}%`);
+      }
+      
+      // 设置模式
+      function setMode(mode) {
+        currentMode = mode;
+        resetTimer();
+        
+        // 移除所有模式按钮的活动状态
+        [pomodoroBtn, shortBreakBtn, longBreakBtn].forEach(btn => btn.classList.remove('active'));
+        
+        // 移除所有模式的活动状态
+        timerModes.classList.remove('work-active', 'short-break-active', 'long-break-active');
+        
+        // 设置当前模式
+        if (mode === 'work') {
+          pomodoroBtn.classList.add('active');
+          timerModes.classList.add('work-active');
+          currentMinutes = parseInt(workTime.value);
+          statusText.textContent = '专注工作';
+        } else if (mode === 'short-break') {
+          shortBreakBtn.classList.add('active');
+          timerModes.classList.add('short-break-active');
+          currentMinutes = parseInt(shortBreakTime.value);
+          statusText.textContent = '短暂休息';
+        } else if (mode === 'long-break') {
+          longBreakBtn.classList.add('active');
+          timerModes.classList.add('long-break-active');
+          currentMinutes = parseInt(longBreakTime.value);
+          statusText.textContent = '充分休息';
+        }
+        
+        currentSeconds = currentMinutes * 60;
+        totalSeconds = currentSeconds;
+        updateTimerDisplay();
+      }
+      
+      // 开始计时器
+      function startTimer() {
+        if (timerInterval !== null) return;
+        
+        startBtn.disabled = true;
+        pauseBtn.disabled = false;
+        resetBtn.disabled = false;
+        
+        timerInterval = setInterval(() => {
+          if (currentSeconds > 0) {
+            currentSeconds--;
+            updateTimerDisplay();
+          } else {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            alarmSound.play();
+            resetBtn.disabled = false;
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            statusText.textContent = '时间到！';
+          }
+        }, 1000);
+      }
+      
+      // 暂停计时器
+      function pauseTimer() {
+        if (timerInterval === null) return;
+        
+        clearInterval(timerInterval);
+        timerInterval = null;
+        startBtn.disabled = false;
+        pauseBtn.disabled = true;
+        statusText.textContent = '已暂停';
+      }
+      
+      // 重置计时器
+      function resetTimer() {
+        clearInterval(timerInterval);
+        timerInterval = null;
+        startBtn.disabled = false;
+        pauseBtn.disabled = true;
+        resetBtn.disabled = true;
+        
+        if (currentMode === 'work') {
+          currentMinutes = parseInt(workTime.value);
+          statusText.textContent = '准备开始';
+        } else if (currentMode === 'short-break') {
+          currentMinutes = parseInt(shortBreakTime.value);
+          statusText.textContent = '准备休息';
+        } else if (currentMode === 'long-break') {
+          currentMinutes = parseInt(longBreakTime.value);
+          statusText.textContent = '准备休息';
+        }
+        
+        currentSeconds = currentMinutes * 60;
+        totalSeconds = currentSeconds;
+        updateTimerDisplay();
+      }
+      
+      // 设置默认模式
+      setMode('work');
+      
+      // 事件监听
+      startBtn.addEventListener('click', startTimer);
+      pauseBtn.addEventListener('click', pauseTimer);
+      resetBtn.addEventListener('click', resetTimer);
+      pomodoroBtn.addEventListener('click', () => setMode('work'));
+      shortBreakBtn.addEventListener('click', () => setMode('short-break'));
+      longBreakBtn.addEventListener('click', () => setMode('long-break'));
+      
+      // 切换设置面板
+      toggleSettings.addEventListener('click', () => {
+        settingsPanel.classList.toggle('settings-visible');
+        settingsArrow.classList.toggle('rotate-180');
+      });
+      
+      // 时间设置增减按钮
+      document.querySelectorAll('.increment-time').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = document.getElementById(btn.dataset.target);
+          let value = parseInt(target.value);
+          const max = parseInt(target.getAttribute('max'));
+          
+          if (value < max) {
+            target.value = value + 1;
+            
+            // 如果当前模式与更改的设置相关，则更新计时器
+            if ((currentMode === 'work' && target.id === 'work-time') ||
+                (currentMode === 'short-break' && target.id === 'short-break-time') ||
+                (currentMode === 'long-break' && target.id === 'long-break-time')) {
+              resetTimer();
+            }
+          }
+        });
+      });
+      
+      document.querySelectorAll('.decrement-time').forEach(btn => {
+        btn.addEventListener('click', () => {
+          const target = document.getElementById(btn.dataset.target);
+          let value = parseInt(target.value);
+          const min = parseInt(target.getAttribute('min'));
+          
+          if (value > min) {
+            target.value = value - 1;
+            
+            // 如果当前模式与更改的设置相关，则更新计时器
+            if ((currentMode === 'work' && target.id === 'work-time') ||
+                (currentMode === 'short-break' && target.id === 'short-break-time') ||
+                (currentMode === 'long-break' && target.id === 'long-break-time')) {
+              resetTimer();
+            }
+          }
+        });
+      });
+      
+      // 数字输入框变化监听
+      [workTime, shortBreakTime, longBreakTime].forEach(input => {
+        input.addEventListener('change', () => {
+          const min = parseInt(input.getAttribute('min'));
+          const max = parseInt(input.getAttribute('max'));
+          let value = parseInt(input.value);
+          
+          if (isNaN(value) || value < min) {
+            input.value = min;
+          } else if (value > max) {
+            input.value = max;
+          }
+          
+          // 如果当前模式与更改的设置相关，则更新计时器
+          if ((currentMode === 'work' && input.id === 'work-time') ||
+              (currentMode === 'short-break' && input.id === 'short-break-time') ||
+              (currentMode === 'long-break' && input.id === 'long-break-time')) {
+            resetTimer();
+          }
+        });
+      });
+    });
+  </script>
 </body>
 </html> 
